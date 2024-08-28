@@ -1,12 +1,10 @@
 blueprint:
   name: Actions at Sunrise and Sunset Elevation
   description: |
-  
     Manage your lighting based on the sun's position.
     Set different elevation thresholds for turning lights on at sunrise
-    and off at sunset to match your preferences and enhance automation.
+    and off at sunset, or activate scenes based on your preferences.
 
-    
   domain: automation
   input:
     trigger_at_startup:
@@ -43,11 +41,27 @@ blueprint:
         entity:
           domain: light
 
+    sunrise_scene:
+      name: Sunrise Scene
+      description: The scene to activate at sunrise.
+      selector:
+        entity:
+          domain: scene
+
+    sunset_scene:
+      name: Sunset Scene
+      description: The scene to activate at sunset.
+      selector:
+        entity:
+          domain: scene
+
 variables:
   trigger_at_startup: !input trigger_at_startup
   sunrise_elevation_shift: !input sunrise_elevation_shift
   sunset_elevation_shift: !input sunset_elevation_shift
   target_light: !input target_light
+  sunrise_scene: !input sunrise_scene
+  sunset_scene: !input sunset_scene
 
 trigger:
   - platform: numeric_state
@@ -95,20 +109,44 @@ action:
             attribute: rising
             state: 'true'
         sequence:
-          # Action for sunrise: Turn on the light
-          - service: light.turn_on
-            target:
-              entity_id: "{{ target_light }}"
+          # Action for sunrise: Turn on the light or activate scene
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ sunrise_scene is not none }}"
+                sequence:
+                  - service: scene.turn_on
+                    target:
+                      entity_id: "{{ sunrise_scene }}"
+              - conditions:
+                  - condition: template
+                    value_template: "{{ sunrise_scene is none }}"
+                sequence:
+                  - service: light.turn_on
+                    target:
+                      entity_id: "{{ target_light }}"
       - conditions:
           - condition: state
             entity_id: sun.sun
             attribute: rising
             state: 'false'
         sequence:
-          # Action for sunset: Turn off the light
-          - service: light.turn_off
-            target:
-              entity_id: "{{ target_light }}"
+          # Action for sunset: Turn off the light or activate scene
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ sunset_scene is not none }}"
+                sequence:
+                  - service: scene.turn_on
+                    target:
+                      entity_id: "{{ sunset_scene }}"
+              - conditions:
+                  - condition: template
+                    value_template: "{{ sunset_scene is none }}"
+                sequence:
+                  - service: light.turn_off
+                    target:
+                      entity_id: "{{ target_light }}"
     default: []
 
 mode: single
