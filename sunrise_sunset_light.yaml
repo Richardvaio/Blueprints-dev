@@ -5,10 +5,8 @@ blueprint:
     Configure distinct elevation thresholds for turning lights on
     at sunrise and off at sunset. Tailor the automation to your
     preferences for a more efficient lighting control.
-
   domain: automation
   input:
-    # General Settings
     trigger_at_startup:
       name: Trigger at Startup
       description: Whether to trigger actions at startup if elevation conditions are met.
@@ -16,29 +14,26 @@ blueprint:
       selector:
         boolean:
 
-    # Sunset Settings
-    sunset_elevation_shift:
-      name: Sunset Elevation Shift
-      description: Elevation shift value to compare against for sunset (-6° to 6°).
-      default: -1.5
-      selector:
-        number:
-          min: -6
-          max: 6
-          unit_of_measurement: "°"
-
-    # Sunrise Settings
     sunrise_elevation_shift:
       name: Sunrise Elevation Shift
       description: Elevation shift value to compare against for sunrise (-6° to 6°).
-      default: -2
+      default: 0
       selector:
         number:
           min: -6
           max: 6
           unit_of_measurement: "°"
 
-    # Light Settings
+    sunset_elevation_shift:
+      name: Sunset Elevation Shift
+      description: Elevation shift value to compare against for sunset (-6° to 6°).
+      default: 0
+      selector:
+        number:
+          min: -6
+          max: 6
+          unit_of_measurement: "°"
+
     target_light:
       name: Target Light
       description: The light to control at sunrise and sunset.
