@@ -45,6 +45,7 @@ blueprint:
       selector:
         entity:
           domain: light
+      default: null  # Make it optional by default
 
     sunrise_scene:
       name: Sunrise Scene
@@ -52,6 +53,7 @@ blueprint:
       selector:
         entity:
           domain: scene
+      default: null  # Make it optional by default
 
     sunset_scene:
       name: Sunset Scene
@@ -59,6 +61,7 @@ blueprint:
       selector:
         entity:
           domain: scene
+      default: null  # Make it optional by default
 
 variables:
   trigger_at_startup: !input trigger_at_startup
