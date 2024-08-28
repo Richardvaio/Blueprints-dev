@@ -1,8 +1,8 @@
 blueprint:
-  name: Sunrise and Sunset Automation
+  name: A1 - Sunrise and Sunset Automation
   description: >
     # 🔆 Sunrise and Sunset Automation 🔆
-    **Version: 1**
+    Version: 1.0
 
     <details>
     <summary><b>Automate your home lighting:</b></summary>
