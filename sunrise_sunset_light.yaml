@@ -11,21 +11,21 @@ blueprint:
         boolean:
     sunrise_elevation_shift:
       name: Sunrise Elevation Shift
-      description: Elevation shift value to compare against for sunrise.
+      description: Elevation shift value to compare against for sunrise (-6° to 6°).
       default: 0
       selector:
         number:
-          min: -90
-          max: 90
+          min: -6
+          max: 6
           unit_of_measurement: "°"
     sunset_elevation_shift:
       name: Sunset Elevation Shift
-      description: Elevation shift value to compare against for sunset.
+      description: Elevation shift value to compare against for sunset (-6° to 6°).
       default: 0
       selector:
         number:
-          min: -90
-          max: 90
+          min: -6
+          max: 6
           unit_of_measurement: "°"
     target_light:
       name: Target Light
