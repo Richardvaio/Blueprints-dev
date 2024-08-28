@@ -1,6 +1,10 @@
 blueprint:
   name: Actions at Sunrise and Sunset Elevation
-  description: Turn a light on at sunrise and off at sunset based on sun elevation, with separate elevation shift values for sunrise and sunset.
+  description: |
+  Manage your lighting based on the sun's position.
+  Set different elevation thresholds for turning lights on at sunrise
+  and off at sunset to match your preferences and enhance automation.
+
   domain: automation
   input:
     # General Settings
@@ -11,22 +15,22 @@ blueprint:
       selector:
         boolean:
 
-    # Sunrise Settings
-    sunrise_elevation_shift:
-      name: Sunrise Elevation Shift
-      description: Elevation shift value to compare against for sunrise (-6° to 6°).
-      default: 0
+    # Sunset Settings
+    sunset_elevation_shift:
+      name: Sunset Elevation Shift
+      description: Elevation shift value to compare against for sunset (-6° to 6°).
+      default: -1.5
       selector:
         number:
           min: -6
           max: 6
           unit_of_measurement: "°"
 
-    # Sunset Settings
-    sunset_elevation_shift:
-      name: Sunset Elevation Shift
-      description: Elevation shift value to compare against for sunset (-6° to 6°).
-      default: 0
+    # Sunrise Settings
+    sunrise_elevation_shift:
+      name: Sunrise Elevation Shift
+      description: Elevation shift value to compare against for sunrise (-6° to 6°).
+      default: -2
       selector:
         number:
           min: -6
