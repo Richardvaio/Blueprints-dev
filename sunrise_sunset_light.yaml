@@ -1,6 +1,6 @@
 blueprint:
   name: Actions at Sunrise and Sunset Elevation
-  description: Turn a light on at sunrise and off at sunset based on sun elevation.
+  description: Turn a light on at sunrise and off at sunset based on sun elevation with different elevation shift values.
   domain: automation
   input:
     trigger_at_startup:
@@ -9,9 +9,18 @@ blueprint:
       default: true
       selector:
         boolean:
-    elevation_shift:
-      name: Elevation Shift
-      description: Elevation shift value to compare against.
+    sunrise_elevation_shift:
+      name: Sunrise Elevation Shift
+      description: Elevation shift value to compare against for sunrise.
+      default: 0
+      selector:
+        number:
+          min: -90
+          max: 90
+          unit_of_measurement: "°"
+    sunset_elevation_shift:
+      name: Sunset Elevation Shift
+      description: Elevation shift value to compare against for sunset.
       default: 0
       selector:
         number:
@@ -27,7 +36,8 @@ blueprint:
 
 variables:
   trigger_at_startup: !input trigger_at_startup
-  elevation_shift: !input elevation_shift
+  sunrise_elevation_shift: !input sunrise_elevation_shift
+  sunset_elevation_shift: !input sunset_elevation_shift
   target_light: !input target_light
 
 trigger:
@@ -55,7 +65,7 @@ condition:
           - condition: template
             value_template: >-
               {{ trigger.platform != "homeassistant" or 
-                 (trigger_at_startup and state_attr("sun.sun", "elevation") >= elevation_shift) }}
+                 (trigger_at_startup and state_attr("sun.sun", "elevation") >= sunrise_elevation_shift) }}
       # Sunset condition
       - condition: and
         conditions:
@@ -66,7 +76,7 @@ condition:
           - condition: template
             value_template: >-
               {{ trigger.platform != "homeassistant" or 
-                 (trigger_at_startup and state_attr("sun.sun", "elevation") <= elevation_shift) }}
+                 (trigger_at_startup and state_attr("sun.sun", "elevation") <= sunset_elevation_shift) }}
 
 action:
   - choose:
