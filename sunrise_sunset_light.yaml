@@ -1,15 +1,18 @@
 blueprint:
   name: Sunrise and Sunset Automation
-  description: |
-    Automate your home lighting or scenes based on the sun's elevation.
-    - Set elevation thresholds to trigger actions at sunrise and sunset.
-    - Provide either a light or scenes; scenes override light control.
+  description: >
+    # 🔆 Sunrise and Sunset Automation 🔆
+    **Version: 1**
+
+    <details>
+    <summary><b>Automate your home lighting:</b></summary>
 
     **Important**: 
-    - Either a light entity or scenes must be specified.
-    - If both are provided, scenes take priority.
-    - The automation logs a warning if neither are specified.
-
+      - Set elevation thresholds to trigger actions at sunrise and sunset.
+      - Provide either a light or scenes; scenes take priority.
+      - Either a light entity or scenes must be specified.
+      - The automation logs a warning if neither are specified.
+    </details>
   domain: automation
   input:
     trigger_at_startup:
