@@ -2,8 +2,9 @@ blueprint:
   name: Actions at Sunrise and Sunset Elevation
   description: |
     Manage your lighting based on the sun's position.
-    Set different elevation thresholds for turning lights on at sunrise
-    and off at sunset to match your preferences and enhance automation.
+    Configure distinct elevation thresholds for turning lights on
+    at sunrise and off at sunset. Tailor the automation to your
+    preferences for a more efficient lighting control.
 
   domain: automation
   input:
