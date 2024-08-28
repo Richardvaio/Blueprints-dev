@@ -3,6 +3,7 @@ blueprint:
   description: Turn a light on at sunrise and off at sunset based on sun elevation, with separate elevation shift values for sunrise and sunset.
   domain: automation
   input:
+    # General Settings
     trigger_at_startup:
       name: Trigger at Startup
       description: Whether to trigger actions at startup if elevation conditions are met.
@@ -10,6 +11,7 @@ blueprint:
       selector:
         boolean:
 
+    # Sunrise Settings
     sunrise_elevation_shift:
       name: Sunrise Elevation Shift
       description: Elevation shift value to compare against for sunrise (-6° to 6°).
@@ -20,6 +22,7 @@ blueprint:
           max: 6
           unit_of_measurement: "°"
 
+    # Sunset Settings
     sunset_elevation_shift:
       name: Sunset Elevation Shift
       description: Elevation shift value to compare against for sunset (-6° to 6°).
@@ -29,28 +32,14 @@ blueprint:
           min: -6
           max: 6
           unit_of_measurement: "°"
-    
+
+    # Light Settings
     target_light:
       name: Target Light
       description: The light to control at sunrise and sunset.
       selector:
         entity:
           domain: light
-
-    # Descriptive text fields for logical grouping
-    sunrise_group:
-      name: Sunrise Settings
-      description: Configuration for sunrise actions and conditions.
-      selector:
-        text:
-          type: text
-
-    sunset_group:
-      name: Sunset Settings
-      description: Configuration for sunset actions and conditions.
-      selector:
-        text:
-          type: text
 
 variables:
   trigger_at_startup: !input trigger_at_startup
