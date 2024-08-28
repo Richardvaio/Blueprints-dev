@@ -1,27 +1,27 @@
 blueprint:
-  name: Actions at Sunrise and Sunset Elevation
+  name: Sunrise and Sunset Automation
   description: |
-    Automate your home lighting and scenes based on the sun's position.
-    Set different elevation thresholds to activate scenes at sunrise and sunset,
-    with options to control lights if scenes are not specified.
+    Automate your home lighting or scenes based on the sun's elevation.
+    - Set elevation thresholds to trigger actions at sunrise and sunset.
+    - Provide either a light or scenes; scenes override light control.
 
     **Important**: 
     - Either a light entity or scenes must be specified.
-    - If both a light entity and scenes are provided, scenes will have priority.
-    - The light will only be controlled if no corresponding scene is set.
+    - If both are provided, scenes take priority.
+    - The automation logs a warning if neither are specified.
 
   domain: automation
   input:
     trigger_at_startup:
       name: Trigger at Startup
-      description: Whether to trigger actions at startup if elevation conditions are met.
+      description: Trigger actions at startup if conditions are met.
       default: true
       selector:
         boolean:
 
     sunrise_elevation_shift:
       name: Sunrise Elevation Shift
-      description: Elevation shift value for sunrise (-6° to 6°).
+      description: Threshold for sunrise actions (-6° to 6°).
       default: -1.5
       selector:
         number:
@@ -31,7 +31,7 @@ blueprint:
 
     sunset_elevation_shift:
       name: Sunset Elevation Shift
-      description: Elevation shift value for sunset (-6° to 6°).
+      description: Threshold for sunset actions (-6° to 6°).
       default: -2
       selector:
         number:
@@ -41,7 +41,7 @@ blueprint:
 
     target_light:
       name: Target Light
-      description: The light to control at sunrise and sunset. Either this or scenes must be provided.
+      description: The light to control if no scenes are provided.
       selector:
         entity:
           domain: light
@@ -49,7 +49,7 @@ blueprint:
 
     sunrise_scene:
       name: Sunrise Scene
-      description: The scene to activate at sunrise. If provided, it takes priority over the light entity.
+      description: The scene to activate at sunrise. Takes priority over light control.
       selector:
         entity:
           domain: scene
@@ -57,7 +57,7 @@ blueprint:
 
     sunset_scene:
       name: Sunset Scene
-      description: The scene to activate at sunset. If provided, it takes priority over the light entity.
+      description: The scene to activate at sunset. Takes priority over light control.
       selector:
         entity:
           domain: scene
@@ -84,6 +84,12 @@ trigger:
     event: start
 
 condition:
+  - condition: template
+    value_template: >-
+      {% if not target_light and not sunrise_scene and not sunset_scene %}
+      {{ log('Warning: No light or scene specified! Automation will not perform any action.') }}
+      {% endif %}
+
   - condition: or
     conditions:
       # Sunrise condition
@@ -112,43 +118,38 @@ condition:
 action:
   - choose:
       - conditions:
-          - condition: state
-            entity_id: sun.sun
-            attribute: rising
-            state: 'true'
+          - condition: template
+            value_template: "{{ sunrise_scene is not none }}"
+        sequence:
+          - service: scene.turn_on
+            target:
+              entity_id: "{{ sunrise_scene }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ sunset_scene is not none }}"
+        sequence:
+          - service: scene.turn_on
+            target:
+              entity_id: "{{ sunset_scene }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ target_light is not none and sunrise_scene is none and sunset_scene is none }}"
         sequence:
           - choose:
               - conditions:
-                  - condition: template
-                    value_template: "{{ sunrise_scene is not none }}"
-                sequence:
-                  - service: scene.turn_on
-                    target:
-                      entity_id: "{{ sunrise_scene }}"
-              - conditions:
-                  - condition: template
-                    value_template: "{{ sunrise_scene is none and target_light is not none }}"
+                  - condition: state
+                    entity_id: sun.sun
+                    attribute: rising
+                    state: 'true'
                 sequence:
                   - service: light.turn_on
                     target:
                       entity_id: "{{ target_light }}"
-      - conditions:
-          - condition: state
-            entity_id: sun.sun
-            attribute: rising
-            state: 'false'
-        sequence:
-          - choose:
               - conditions:
-                  - condition: template
-                    value_template: "{{ sunset_scene is not none }}"
-                sequence:
-                  - service: scene.turn_on
-                    target:
-                      entity_id: "{{ sunset_scene }}"
-              - conditions:
-                  - condition: template
-                    value_template: "{{ sunset_scene is none and target_light is not none }}"
+                  - condition: state
+                    entity_id: sun.sun
+                    attribute: rising
+                    state: 'false'
                 sequence:
                   - service: light.turn_off
                     target:
