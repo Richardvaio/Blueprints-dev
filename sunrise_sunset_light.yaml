@@ -1,0 +1,95 @@
+blueprint:
+  name: Actions at Sunrise and Sunset Elevation
+  description: Turn a light on at sunrise and off at sunset based on sun elevation.
+  domain: automation
+  input:
+    trigger_at_startup:
+      name: Trigger at Startup
+      description: Whether to trigger actions at startup if elevation conditions are met.
+      default: true
+      selector:
+        boolean:
+    elevation_shift:
+      name: Elevation Shift
+      description: Elevation shift value to compare against.
+      default: 0
+      selector:
+        number:
+          min: -90
+          max: 90
+          unit_of_measurement: "°"
+    target_light:
+      name: Target Light
+      description: The light to control at sunrise and sunset.
+      selector:
+        entity:
+          domain: light
+
+variables:
+  trigger_at_startup: !input trigger_at_startup
+  elevation_shift: !input elevation_shift
+  target_light: !input target_light
+
+trigger:
+  - platform: numeric_state
+    entity_id: sun.sun
+    attribute: elevation
+    above: 0
+  - platform: numeric_state
+    entity_id: sun.sun
+    attribute: elevation
+    below: 0
+  - platform: homeassistant
+    event: start
+
+condition:
+  - condition: or
+    conditions:
+      # Sunrise condition
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: sun.sun
+            attribute: rising
+            state: 'true'
+          - condition: template
+            value_template: >-
+              {{ trigger.platform != "homeassistant" or 
+                 (trigger_at_startup and state_attr("sun.sun", "elevation") >= elevation_shift) }}
+      # Sunset condition
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: sun.sun
+            attribute: rising
+            state: 'false'
+          - condition: template
+            value_template: >-
+              {{ trigger.platform != "homeassistant" or 
+                 (trigger_at_startup and state_attr("sun.sun", "elevation") <= elevation_shift) }}
+
+action:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: sun.sun
+            attribute: rising
+            state: 'true'
+        sequence:
+          # Action for sunrise: Turn on the light
+          - service: light.turn_on
+            target:
+              entity_id: "{{ target_light }}"
+      - conditions:
+          - condition: state
+            entity_id: sun.sun
+            attribute: rising
+            state: 'false'
+        sequence:
+          # Action for sunset: Turn off the light
+          - service: light.turn_off
+            target:
+              entity_id: "{{ target_light }}"
+    default: []
+
+mode: single
