@@ -1,6 +1,6 @@
 blueprint:
   name: Actions at Sunrise and Sunset Elevation
-  description: Turn a light on at sunrise and off at sunset based on sun elevation with separate elevation shift values.
+  description: Turn a light on at sunrise and off at sunset based on sun elevation, with separate elevation shift values for sunrise and sunset.
   domain: automation
   input:
     trigger_at_startup:
