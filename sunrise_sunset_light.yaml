@@ -11,13 +11,11 @@ blueprint:
         - **Make sure to specify a light entity for the automation to work.    
         - **If no light is specified, a warning will be logged, and no actions will be performed.    
     
-      **Change Log**
           Version: 1.0
       **Features:**
-        🔵 **Sunrise and Sunset Triggers**: Automatically turn on your lights at sunrise and turn them off at sunset.
-        🔵 **Customizable Elevation Shifts**: Set specific elevation thresholds to fine-tune when your lights activate or deactivate.
-        🔵 **Startup Trigger**: Optionally trigger the automation when Home Assistant starts, ensuring your lights are always in sync with the current time of day.
-        🔵 **Light Control**: Directly control a single light entity to turn on at sunrise and off at sunset, or vice versa, depending on your preferences.
+          🔵 ***Startup Trigger***
+          🔵 ***Customizable Elevation Shifts*** 
+          🔵 ***Light Control***
 
 
  
