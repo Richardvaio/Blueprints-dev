@@ -60,10 +60,9 @@ blueprint:
     flip_light_action:
       name: Flip Light Action
       description: |
-        If `true`, the light action is flipped:
-        - Turn on at sunrise and turn off at sunset.
-        If `false`, the light will:
-        - Turn off at sunrise and turn on at sunset.
+        If TRUE, the light action is flipped:
+        - Turning on at sunrise and turning off at sunset.
+
       default: false
       selector:
         boolean:
