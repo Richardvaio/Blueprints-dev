@@ -3,19 +3,19 @@ blueprint:
   description: >
       # 🔆 A1 - Sunrise and Sunset Lighting Automation 🔆
 
-        Automate your home lighting based on Sun position!    
-        This blueprint allows you to control a specific light entity at sunrise and sunset,    
-        ensuring your lighting aligns perfectly with the natural daylight cycle.    
+      Automate your home lighting based on Sun position!  
+      This blueprint allows you to control a specific light entity at sunrise and sunset,  
+      ensuring your lighting aligns perfectly with the natural daylight cycle.
 
-      ⚠️**Important Notes:**⚠️   
-            - If no light is specified, a warning will be logged, and no actions will be performed.    
-    
-        Version: 1.0
-        **Features:**
-            - Startup Trigger
-            - Customizable Elevation Shifts 
-            - Light Control
- 
+      ⚠️**Important Notes:**⚠️  
+          - If no light is specified, no actions will be performed. Ensure to provide a light entity.
+
+      Version: 1.0
+      **Features:**
+          - Startup Trigger
+          - Customizable Elevation Shifts 
+          - Light Control
+
   domain: automation
   input:
     trigger_at_startup:
@@ -51,11 +51,10 @@ blueprint:
       selector:
         entity:
           domain: light
-      default: null  # Make it optional by default
 
     flip_light_action:
       name: Flip Light Action
-      description: Flip the light action: if true, turn on at sunrise and off at sunset.
+      description: If true, flip the default light behavior: turn on at sunrise and off at sunset.
       default: false
       selector:
         boolean:
@@ -83,7 +82,7 @@ condition:
   - condition: template
     value_template: >-
       {% if not target_light %}
-      {{ log('Warning: No light specified! Automation will not perform any action.') }}
+      No light specified! Automation will not perform any action.
       {% endif %}
 
   - condition: or
@@ -126,9 +125,9 @@ action:
                 sequence:
                   - service: >
                       {% if flip_light_action %}
-                      light.turn_off
-                      {% else %}
                       light.turn_on
+                      {% else %}
+                      light.turn_off
                       {% endif %}
                     target:
                       entity_id: "{{ target_light }}"
@@ -140,13 +139,12 @@ action:
                 sequence:
                   - service: >
                       {% if flip_light_action %}
-                      light.turn_on
-                      {% else %}
                       light.turn_off
+                      {% else %}
+                      light.turn_on
                       {% endif %}
                     target:
                       entity_id: "{{ target_light }}"
     default: []
 
 mode: single
-
