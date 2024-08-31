@@ -1,26 +1,24 @@
 blueprint:
   name: A1 - Sunrise and Sunset Automation
-  description: >
+  description: |
     # 🔆 A1 - Sunrise and Sunset Lighting Automation 🔆
 
-    Automate your home lighting based on Sun position!  
-    This blueprint allows you to control a specific light entity at sunrise and sunset,  
+    Automate your home lighting based on Sun position!
+    This blueprint allows you to control a specific light entity at sunrise and sunset,
     ensuring your lighting aligns perfectly with the natural daylight cycle.
 
-    ⚠️ **Important Notes:** ⚠️  
+    ⚠️ **Important Notes:** ⚠️
     - If no light is specified, no actions will be performed. Ensure to provide a light entity.
 
-    Version: 1.0  
+    Version: 1.0
     **Features:**
     - Startup Trigger
-    - Customizable Elevation Shifts 
+    - Customizable Elevation Shifts
     - Light Control
 
-    **Flip Light Action:**  
-    If `true`, the light action is flipped:
-    - Turn on the light at sunrise and turn off at sunset.
-    If `false`, the light will:
-    - Turn off at sunrise and turn on at sunset.
+    **Flip Light Action:**
+    - If `true`, the light action is flipped: turn on at sunrise and off at sunset.
+    - If `false`, the light will turn off at sunrise and on at sunset.
 
   domain: automation
   input:
@@ -57,12 +55,15 @@ blueprint:
       selector:
         entity:
           domain: light
+      default: null
 
     flip_light_action:
       name: Flip Light Action
-      description: If `true`, flip the light action:
-        - Turn on at sunrise and off at sunset.
-        - If `false`, turn off at sunrise and on at sunset.
+      description: |
+        If `true`, the light action is flipped:
+        - Turn on at sunrise and turn off at sunset.
+        If `false`, the light will:
+        - Turn off at sunrise and turn on at sunset.
       default: false
       selector:
         boolean:
