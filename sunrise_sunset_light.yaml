@@ -8,10 +8,10 @@ blueprint:
         ensuring your lighting aligns perfectly with the natural daylight cycle.    
 
       ⚠️**Important Notes:**⚠️   
-        - **If no light is specified, a warning will be logged, and no actions will be performed.    
+        - If no light is specified, a warning will be logged, and no actions will be performed.    
     
         Version: 1.0
-      **Features:**
+        **Features:**
           - Startup Trigger
           - Customizable Elevation Shifts 
           - Light Control
