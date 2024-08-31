@@ -1,17 +1,22 @@
 blueprint:
   name: A1 - Sunrise and Sunset Automation
   description: >
-    # 🔆 Sunrise and Sunset Automation 🔆
-    Version: 1.0
+    # 🔆 A1 - Sunrise and Sunset Lighting Automation 🔆
 
-    <details>
-    <summary><b>Automate your home lighting:</b></summary>
+    **Version: 1.0**
 
-    **Important**: 
-      - Set elevation thresholds to trigger actions at sunrise and sunset.
-      - Provide a light entity to control.
-      - The automation logs a warning if no light is specified.
-    </details>
+    Automate your home lighting based on the position of the sun! This blueprint allows you to control a specific light entity at sunrise and sunset, ensuring your lighting aligns perfectly with the natural daylight cycle.
+
+    ### **Features:**
+    - **Sunrise and Sunset Triggers**: Automatically turn on your lights at sunrise and turn them off at sunset.
+    - **Customizable Elevation Shifts**: Set specific elevation thresholds to fine-tune when your lights activate or deactivate, allowing for a tailored experience based on your environment.
+    - **Startup Trigger**: Optionally trigger the automation when Home Assistant starts, ensuring your lights are always in sync with the current time of day.
+    - **Light Control**: Directly control a single light entity to turn on at sunrise and off at sunset, or vice versa, depending on your preferences.
+
+    **Important Notes:**
+    - Make sure to specify a light entity for the automation to work.
+    - If no light is specified, a warning will be logged, and no actions will be performed.
+ 
   domain: automation
   input:
     trigger_at_startup:
