@@ -7,7 +7,7 @@ blueprint:
         This blueprint allows you to control a specific light entity at sunrise and sunset,    
         ensuring your lighting aligns perfectly with the natural daylight cycle.    
 
-      ⚠️  **Important Notes:**  ⚠️   
+      ⚠️**Important Notes:**⚠️   
         - **Make sure to specify a light entity for the automation to work.    
         - **If no light is specified, a warning will be logged, and no actions will be performed.    
     
