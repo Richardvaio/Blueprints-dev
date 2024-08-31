@@ -3,16 +3,16 @@ blueprint:
   description: >
         # 🔆 A1 - Sunrise and Sunset Lighting Automation 🔆
 
-        Automate your home lighting based on the position of the sun! 
-        This blueprint allows you to control a specific light entity at sunrise and sunset, 
-        ensuring your lighting aligns perfectly with the natural daylight cycle.
+        **Automate your home lighting based on the position of the sun! **
+        **This blueprint allows you to control a specific light entity at sunrise and sunset, **
+        **ensuring your lighting aligns perfectly with the natural daylight cycle.**
 
         **Important Notes:**
-        - Make sure to specify a light entity for the automation to work.
-        - If no light is specified, a warning will be logged, and no actions will be performed.
+        🔵 **Make sure to specify a light entity for the automation to work.**
+        🔵 **If no light is specified, a warning will be logged, and no actions will be performed.**
     
-        **Version: 1.0**
-
+        **Change Log**
+          Version: 1.0
         **Features:**
         🔵 **Sunrise and Sunset Triggers**: Automatically turn on your lights at sunrise and turn them off at sunset.
         🔵 **Customizable Elevation Shifts**: Set specific elevation thresholds to fine-tune when your lights activate or deactivate.
