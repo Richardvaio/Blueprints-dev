@@ -10,7 +10,6 @@ blueprint:
     - If TRUE, the light action is flipped: turning ON at sunrise and OFF at sunset.
     - If FALSE, the light will turn OFF at sunrise and ON at sunset.
 
-
   domain: automation
   input:
     trigger_at_startup:
@@ -57,92 +56,92 @@ blueprint:
           domain: light
       default: null
 
-variables:
-  trigger_at_startup: !input trigger_at_startup
-  sunrise_elevation_shift: !input sunrise_elevation_shift
-  sunset_elevation_shift: !input sunset_elevation_shift
-  target_light: !input target_light
-  flip_light_action: !input flip_light_action
+  variables:
+    trigger_at_startup: !input trigger_at_startup
+    sunrise_elevation_shift: !input sunrise_elevation_shift
+    sunset_elevation_shift: !input sunset_elevation_shift
+    target_light: !input target_light
+    flip_light_action: !input flip_light_action
 
-trigger:
-  - platform: numeric_state
-    entity_id: sun.sun
-    attribute: elevation
-    below: !input sunset_elevation_shift
-  - platform: numeric_state
-    entity_id: sun.sun
-    attribute: elevation
-    above: !input sunrise_elevation_shift
-  - platform: homeassistant
-    event: start
+  trigger:
+    - platform: numeric_state
+      entity_id: sun.sun
+      attribute: elevation
+      below: !input sunset_elevation_shift
+    - platform: numeric_state
+      entity_id: sun.sun
+      attribute: elevation
+      above: !input sunrise_elevation_shift
+    - platform: homeassistant
+      event: start
 
-condition:
-  - condition: template
-    value_template: >-
-      {% if not target_light %}
-      No light specified! Automation will not perform any action.
-      {% endif %}
+  condition:
+    - condition: template
+      value_template: >
+        {% if not target_light %}
+        No light specified! Automation will not perform any action.
+        {% endif %}
 
-  - condition: or
-    conditions:
-      # Sunset condition
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: sun.sun
-            attribute: rising
-            state: 'false'
-          - condition: template
-            value_template: >-
-              {{ trigger.platform != "homeassistant" or 
-                 (trigger_at_startup and state_attr("sun.sun", "elevation") <= sunset_elevation_shift) }}
-      # Sunrise condition
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: sun.sun
-            attribute: rising
-            state: 'true'
-          - condition: template
-            value_template: >-
-              {{ trigger.platform != "homeassistant" or 
-                 (trigger_at_startup and state_attr("sun.sun", "elevation") >= sunrise_elevation_shift) }}
+    - condition: or
+      conditions:
+        # Sunset condition
+        - condition: and
+          conditions:
+            - condition: state
+              entity_id: sun.sun
+              attribute: rising
+              state: 'false'
+            - condition: template
+              value_template: >
+                {{ trigger.platform != "homeassistant" or 
+                   (trigger_at_startup and state_attr("sun.sun", "elevation") <= sunset_elevation_shift) }}
+        # Sunrise condition
+        - condition: and
+          conditions:
+            - condition: state
+              entity_id: sun.sun
+              attribute: rising
+              state: 'true'
+            - condition: template
+              value_template: >
+                {{ trigger.platform != "homeassistant" or 
+                   (trigger_at_startup and state_attr("sun.sun", "elevation") >= sunrise_elevation_shift) }}
 
-action:
-  - choose:
-      - conditions:
-          - condition: template
-            value_template: "{{ target_light is not none }}"
-        sequence:
-          - choose:
-              - conditions:
-                  - condition: state
-                    entity_id: sun.sun
-                    attribute: rising
-                    state: 'false'
-                sequence:
-                  - service: >
-                      {% if flip_light_action %}
-                      light.turn_on
-                      {% else %}
-                      light.turn_off
-                      {% endif %}
-                    target:
-                      entity_id: "{{ target_light }}"
-              - conditions:
-                  - condition: state
-                    entity_id: sun.sun
-                    attribute: rising
-                    state: 'true'
-                sequence:
-                  - service: >
-                      {% if flip_light_action %}
-                      light.turn_off
-                      {% else %}
-                      light.turn_on
-                      {% endif %}
-                    target:
-                      entity_id: "{{ target_light }}"
-    default: []
+  action:
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ target_light is not none }}"
+          sequence:
+            - choose:
+                - conditions:
+                    - condition: state
+                      entity_id: sun.sun
+                      attribute: rising
+                      state: 'false'
+                  sequence:
+                    - service: >
+                        {% if flip_light_action %}
+                        light.turn_on
+                        {% else %}
+                        light.turn_off
+                        {% endif %}
+                      target:
+                        entity_id: "{{ target_light }}"
+                - conditions:
+                    - condition: state
+                      entity_id: sun.sun
+                      attribute: rising
+                      state: 'true'
+                  sequence:
+                    - service: >
+                        {% if flip_light_action %}
+                        light.turn_off
+                        {% else %}
+                        light.turn_on
+                        {% endif %}
+                      target:
+                        entity_id: "{{ target_light }}"
+      default: []
 
-mode: single
+  mode: single
