@@ -16,6 +16,10 @@ blueprint:
     - Customizable Elevation Shifts 
     - Light Control
 
+    **Flip Light Action:**  
+    If `true`, the light action is flipped: turn on at sunrise and off at sunset.  
+    If `false`, the light will turn off at sunrise and on at sunset.
+
   domain: automation
   input:
     trigger_at_startup:
@@ -54,7 +58,7 @@ blueprint:
 
     flip_light_action:
       name: Flip Light Action
-      description: If true, flip the light action: turn on at sunrise and off at sunset.
+      description: If `true`, flip the light action: turn on at sunrise and off at sunset.
       default: false
       selector:
         boolean:
