@@ -9,9 +9,8 @@ blueprint:
 
     **Important**: 
       - Set elevation thresholds to trigger actions at sunrise and sunset.
-      - Provide either a light or scenes; scenes take priority.
-      - Either a light entity or scenes must be specified.
-      - The automation logs a warning if neither are specified.
+      - Provide a light entity to control.
+      - The automation logs a warning if no light is specified.
     </details>
   domain: automation
   input:
@@ -25,7 +24,7 @@ blueprint:
     sunrise_elevation_shift:
       name: Sunrise Elevation Shift
       description: Threshold for sunrise actions (-6° to 6°).
-      default: -1.5
+      default: -1
       selector:
         number:
           min: -6
@@ -35,7 +34,7 @@ blueprint:
     sunset_elevation_shift:
       name: Sunset Elevation Shift
       description: Threshold for sunset actions (-6° to 6°).
-      default: -2
+      default: -4
       selector:
         number:
           min: -6
@@ -44,26 +43,10 @@ blueprint:
 
     target_light:
       name: Target Light
-      description: The light to control if no scenes are provided.
+      description: The light to control at sunrise and sunset.
       selector:
         entity:
           domain: light
-      default: null  # Make it optional by default
-
-    sunrise_scene:
-      name: Sunrise Scene
-      description: The scene to activate at sunrise. Takes priority over light control.
-      selector:
-        entity:
-          domain: scene
-      default: null  # Make it optional by default
-
-    sunset_scene:
-      name: Sunset Scene
-      description: The scene to activate at sunset. Takes priority over light control.
-      selector:
-        entity:
-          domain: scene
       default: null  # Make it optional by default
 
 variables:
@@ -71,8 +54,6 @@ variables:
   sunrise_elevation_shift: !input sunrise_elevation_shift
   sunset_elevation_shift: !input sunset_elevation_shift
   target_light: !input target_light
-  sunrise_scene: !input sunrise_scene
-  sunset_scene: !input sunset_scene
 
 trigger:
   - platform: numeric_state
@@ -89,8 +70,8 @@ trigger:
 condition:
   - condition: template
     value_template: >-
-      {% if not target_light and not sunrise_scene and not sunset_scene %}
-      {{ log('Warning: No light or scene specified! Automation will not perform any action.') }}
+      {% if not target_light %}
+      {{ log('Warning: No light specified! Automation will not perform any action.') }}
       {% endif %}
 
   - condition: or
@@ -122,21 +103,7 @@ action:
   - choose:
       - conditions:
           - condition: template
-            value_template: "{{ sunrise_scene is not none }}"
-        sequence:
-          - service: scene.turn_on
-            target:
-              entity_id: "{{ sunrise_scene }}"
-      - conditions:
-          - condition: template
-            value_template: "{{ sunset_scene is not none }}"
-        sequence:
-          - service: scene.turn_on
-            target:
-              entity_id: "{{ sunset_scene }}"
-      - conditions:
-          - condition: template
-            value_template: "{{ target_light is not none and sunrise_scene is none and sunset_scene is none }}"
+            value_template: "{{ target_light is not none }}"
         sequence:
           - choose:
               - conditions:
