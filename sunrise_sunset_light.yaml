@@ -15,8 +15,6 @@ blueprint:
           - Startup Trigger
           - Customizable Elevation Shifts 
           - Light Control
-
-
  
   domain: automation
   input:
