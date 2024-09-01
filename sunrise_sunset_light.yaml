@@ -71,11 +71,9 @@ trigger:
     event: start
   - platform: state
     entity_id: !input target_light
-    from: "unavailable"
     to: "on"
   - platform: state
     entity_id: !input target_light
-    from: "unknown"
     to: "on"
 
 condition:
