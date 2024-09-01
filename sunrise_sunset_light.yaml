@@ -68,6 +68,14 @@ trigger:
     above: !input sunrise_elevation_shift
   - platform: homeassistant
     event: start
+  - platform: state
+    entity_id: !input target_light
+    from: 'unavailable'
+    to: 'on'
+  - platform: state
+    entity_id: !input target_light
+    from: 'unknown'
+    to: 'on'
 
 condition:
   - condition: template
