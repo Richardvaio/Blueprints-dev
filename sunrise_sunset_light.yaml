@@ -75,7 +75,7 @@ blueprint:
   condition:
     - condition: template
       value_template: >-
-        {% if not (target_light) %}
+        {% if not target_light %}
           No light specified! Automation will not perform any action.
         {% endif %}
 
