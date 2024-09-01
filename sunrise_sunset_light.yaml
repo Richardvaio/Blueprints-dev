@@ -57,89 +57,82 @@ blueprint:
           domain: light
       default: null
 
-  trigger:
-    - platform: numeric_state
-      entity_id: sun.sun
-      attribute: elevation
-      below: !input sunset_elevation_shift
-    - platform: numeric_state
-      entity_id: sun.sun
-      attribute: elevation
-      above: !input sunrise_elevation_shift
-    - platform: homeassistant
-      event: start
+trigger:
+  - platform: numeric_state
+    entity_id: sun.sun
+    attribute: elevation
+    below: !input sunset_elevation_shift
+  - platform: numeric_state
+    entity_id: sun.sun
+    attribute: elevation
+    above: !input sunrise_elevation_shift
+  - platform: homeassistant
+    event: start
 
-  condition:
-    - condition: template
-      value_template: >-
-        {{ target_light is not none }}
+condition:
+  - condition: template
+    value_template: "{{ not target_light is none }}"
 
-    - condition: or
-      conditions:
-        # Sunset condition
-        - condition: and
-          conditions:
-            - condition: state
-              entity_id: sun.sun
-              attribute: rising
-              state: 'false'
-            - condition: template
-              value_template: >-
-                {{ trigger.platform != "homeassistant" or 
-                   (trigger_at_startup and state_attr("sun.sun", "elevation") <= sunset_elevation_shift) }}
-        # Sunrise condition
-        - condition: and
-          conditions:
-            - condition: state
-              entity_id: sun.sun
-              attribute: rising
-              state: 'true'
-            - condition: template
-              value_template: >-
-                {{ trigger.platform != "homeassistant" or 
-                   (trigger_at_startup and state_attr("sun.sun", "elevation") >= sunrise_elevation_shift) }}
+  - condition: or
+    conditions:
+      # Sunset condition
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: sun.sun
+            attribute: rising
+            state: 'false'
+          - condition: template
+            value_template: >
+              {{ trigger.platform != "homeassistant" or 
+                 (trigger_at_startup and state_attr("sun.sun", "elevation") <= sunset_elevation_shift) }}
+      # Sunrise condition
+      - condition: and
+        conditions:
+          - condition: state
+            entity_id: sun.sun
+            attribute: rising
+            state: 'true'
+          - condition: template
+            value_template: >
+              {{ trigger.platform != "homeassistant" or 
+                 (trigger_at_startup and state_attr("sun.sun", "elevation") >= sunrise_elevation_shift) }}
 
-  action:
-    - choose:
-        - conditions:
-            - condition: template
-              value_template: "{{ target_light is not none }}"
-          sequence:
-            - wait_for_trigger:
-                - platform: state
-                  entity_id: "{{ target_light }}"
-                  to: 'on'
-                  for:
-                    seconds: 10
-            - choose:
-                - conditions:
-                    - condition: state
-                      entity_id: sun.sun
-                      attribute: rising
-                      state: 'false'
-                  sequence:
-                    - service: >
-                        {% if flip_light_action %}
-                          light.turn_on
-                        {% else %}
-                          light.turn_off
-                        {% endif %}
-                      target:
-                        entity_id: "{{ target_light }}"
-                - conditions:
-                    - condition: state
-                      entity_id: sun.sun
-                      attribute: rising
-                      state: 'true'
-                  sequence:
-                    - service: >
-                        {% if flip_light_action %}
-                          light.turn_off
-                        {% else %}
-                          light.turn_on
-                        {% endif %}
-                      target:
-                        entity_id: "{{ target_light }}"
-      default: []
+action:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ target_light is not none }}"
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: state
+                    entity_id: sun.sun
+                    attribute: rising
+                    state: 'false'
+                sequence:
+                  - service: >
+                      {% if flip_light_action %}
+                        light.turn_on
+                      {% else %}
+                        light.turn_off
+                      {% endif %}
+                    target:
+                      entity_id: "{{ target_light }}"
+              - conditions:
+                  - condition: state
+                    entity_id: sun.sun
+                    attribute: rising
+                    state: 'true'
+                sequence:
+                  - service: >
+                      {% if flip_light_action %}
+                        light.turn_off
+                      {% else %}
+                        light.turn_on
+                      {% endif %}
+                    target:
+                      entity_id: "{{ target_light }}"
+    default: []
 
-  mode: single
+mode: single
