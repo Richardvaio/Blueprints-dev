@@ -76,6 +76,10 @@ trigger:
     entity_id: !input target_light
     from: 'unknown'
     to: 'on'
+  - platform: state
+    entity_id: !input target_light
+    from: 'unknown'
+    to: 'on'
 
 condition:
   - condition: template
