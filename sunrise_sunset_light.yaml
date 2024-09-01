@@ -82,42 +82,26 @@ trigger:
     to: 'on'
 
 condition:
-  - condition: template
-    value_template: "{{ target_light is not none }}"
-
-  - condition: or
+  - condition: or  # Use 'or' because you want the automation to run if either condition is true
     conditions:
       # Sunset condition
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: sun.sun
-            attribute: rising
-            state: 'false'
+      - condition: numeric_state
+        entity_id: sun.sun
+        attribute: elevation
+        below: !input 'sunset_elevation_shift'
+
+      # Sunrise condition
+      - condition: numeric_state
+        entity_id: sun.sun
+        attribute: elevation
+        above: !input 'sunrise_elevation_shift'
+action:
+  - choose:
+      - conditions:
           - condition: numeric_state
             entity_id: sun.sun
             attribute: elevation
             below: !input sunset_elevation_shift
-
-      # Sunrise condition
-      - condition: and
-        conditions:
-          - condition: state
-            entity_id: sun.sun
-            attribute: rising
-            state: 'true'
-          - condition: numeric_state
-            entity_id: sun.sun
-            attribute: elevation
-            above: !input sunrise_elevation_shift
-
-action:
-  - choose:
-      - conditions:
-          - condition: state
-            entity_id: sun.sun
-            attribute: rising
-            state: 'false'
         sequence:
           - service: >
               {% if flip_light_action %}
@@ -128,10 +112,10 @@ action:
             target:
               entity_id: "{{ target_light }}"
       - conditions:
-          - condition: state
+          - condition: numeric_state
             entity_id: sun.sun
-            attribute: rising
-            state: 'true'
+            attribute: elevation
+            above: !input sunrise_elevation_shift
         sequence:
           - service: >
               {% if flip_light_action %}
@@ -142,5 +126,6 @@ action:
             target:
               entity_id: "{{ target_light }}"
     default: []
+
 
 mode: single
