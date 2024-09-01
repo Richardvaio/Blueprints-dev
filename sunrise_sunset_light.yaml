@@ -3,8 +3,8 @@ blueprint:
   description: |
     # 🔆 Sunrise and Sunset Lighting Automation 🔆
 
-    This blueprint automates your home lighting based on the sun's position,
-    ensuring that your lighting aligns perfectly with the natural daylight cycle.
+    This blueprint controls a specific light entity at sunrise and sunset,
+    ensuring your lighting aligns with the natural daylight cycle.
 
     **Flip Light Action:**
     - If TRUE, the light action is flipped: turning ON at sunrise and OFF at sunset.
@@ -18,17 +18,14 @@ blueprint:
       default: true
       selector:
         boolean:
-
     flip_light_action:
       name: Flip Light Action
       description: |
         If TRUE, the light action is flipped:
-        - Turning ON at sunrise and turning OFF at sunset.
-        If FALSE, the light will turn OFF at sunrise and turn ON at sunset.
+        - Turning on at sunrise and turning off at sunset.
       default: false
       selector:
         boolean:
-
     sunrise_elevation_shift:
       name: Sunrise Elevation Shift
       description: Threshold for sunrise actions (-6° to 6°).
@@ -38,7 +35,6 @@ blueprint:
           min: -6
           max: 6
           unit_of_measurement: "°"
-
     sunset_elevation_shift:
       name: Sunset Elevation Shift
       description: Threshold for sunset actions (-6° to 6°).
@@ -48,14 +44,36 @@ blueprint:
           min: -6
           max: 6
           unit_of_measurement: "°"
-
     target_light:
       name: Target Light
       description: The light to control at sunrise and sunset.
       selector:
         entity:
           domain: light
-      default: null
+    use_transition:
+      name: Use Transition
+      description: "Whether to use light transition effects."
+      default: false
+      selector:
+        boolean:
+    light_transition_duration:
+      name: Light Transition Duration
+      description: "Duration of the light transition in seconds."
+      default: 1
+      selector:
+        number:
+          min: 0
+          max: 3600
+          unit_of_measurement: "s"
+
+variables:
+  trigger_at_startup: !input trigger_at_startup
+  sunrise_elevation_shift: !input sunrise_elevation_shift
+  sunset_elevation_shift: !input sunset_elevation_shift
+  target_light: !input target_light
+  flip_light_action: !input flip_light_action
+  use_transition: !input use_transition
+  light_transition_duration: !input light_transition_duration
 
 trigger:
   - platform: numeric_state
@@ -70,54 +88,72 @@ trigger:
     event: start
   - platform: state
     entity_id: !input target_light
-    from: 'unavailable'
-    to: 'on'
+    from: "unavailable"
+    to: "on"
   - platform: state
     entity_id: !input target_light
-    from: 'unknown'
-    to: 'on'
-  - platform: state
-    entity_id: !input target_light
-    from: 'unknown'
-    to: 'on'
+    from: "unknown"
+    to: "on"
 
 condition:
-  - condition: or  # Use 'or' because you want the automation to run if either condition is true
+  - condition: template
+    value_template: "{{ target_light is not none }}"
+  - condition: or
     conditions:
-      # Sunset condition
-      - condition: numeric_state
-        entity_id: sun.sun
-        attribute: elevation
-        below: !input 'sunset_elevation_shift'
-
-      # Sunrise condition
-      - condition: numeric_state
-        entity_id: sun.sun
-        attribute: elevation
-        above: !input 'sunrise_elevation_shift'
-action:
-  - choose:
-      - conditions:
+      - condition: and
+        conditions:
           - condition: numeric_state
             entity_id: sun.sun
             attribute: elevation
             below: !input sunset_elevation_shift
-        sequence:
-          - service: light.turn_on
-            target:
-              entity_id: "{{ target_light }}"
-            data:
-              brightness: 255  # Optional: Adjust brightness if needed
-      - conditions:
+          - condition: state
+            entity_id: sun.sun
+            attribute: rising
+            state: 'false'
+      - condition: and
+        conditions:
           - condition: numeric_state
             entity_id: sun.sun
             attribute: elevation
             above: !input sunrise_elevation_shift
+          - condition: state
+            entity_id: sun.sun
+            attribute: rising
+            state: 'true'
+
+action:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: sun.sun
+            attribute: rising
+            state: 'false'
         sequence:
-          - service: light.turn_off
+          - service: >
+              {% if use_transition %}
+                light.turn_off
+              {% else %}
+                light.turn_on
+              {% endif %}
             target:
               entity_id: "{{ target_light }}"
+            data:
+              transition: "{{ light_transition_duration }}"
+      - conditions:
+          - condition: state
+            entity_id: sun.sun
+            attribute: rising
+            state: 'true'
+        sequence:
+          - service: >
+              {% if use_transition %}
+                light.turn_on
+              {% else %}
+                light.turn_off
+              {% endif %}
+            target:
+              entity_id: "{{ target_light }}"
+            data:
+              transition: "{{ light_transition_duration }}"
     default: []
-
-
 mode: single
