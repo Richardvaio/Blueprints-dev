@@ -3,15 +3,12 @@ blueprint:
   description: |
     # 🔆 Sunrise and Sunset Lighting Automation 🔆
 
-    This blueprint automates your home lighting based on the sun's position,
-    ensuring that your lighting aligns perfectly with the natural daylight cycle.
+    This blueprint allows you to control a specific light entity at sunrise and sunset,
+    ensuring your lighting aligns perfectly with the natural daylight cycle.
 
     **Flip Light Action:**
     - If TRUE, the light action is flipped: turning ON at sunrise and OFF at sunset.
     - If FALSE, the light will turn OFF at sunrise and ON at sunset.
-
-    **Important Note:**
-    - If no light is specified, no actions will be performed.
 
   domain: automation
   input:
@@ -26,8 +23,7 @@ blueprint:
       name: Flip Light Action
       description: |
         If TRUE, the light action is flipped:
-        - Turning ON at sunrise and turning OFF at sunset.
-        If FALSE, the light will turn OFF at sunrise and turn ON at sunset.
+        - Turning on at sunrise and turning off at sunset.
       default: false
       selector:
         boolean:
@@ -60,6 +56,13 @@ blueprint:
           domain: light
       default: null
 
+  variables:
+    trigger_at_startup: !input trigger_at_startup
+    sunrise_elevation_shift: !input sunrise_elevation_shift
+    sunset_elevation_shift: !input sunset_elevation_shift
+    target_light: !input target_light
+    flip_light_action: !input flip_light_action
+
   trigger:
     - platform: numeric_state
       entity_id: sun.sun
@@ -74,13 +77,14 @@ blueprint:
 
   condition:
     - condition: template
-      value_template: >-
+      value_template: >
         {% if not target_light %}
-          No light specified! Automation will not perform any action.
+        No light specified! Automation will not perform any action.
         {% endif %}
 
     - condition: or
       conditions:
+        # Sunset condition
         - condition: and
           conditions:
             - condition: state
@@ -88,9 +92,10 @@ blueprint:
               attribute: rising
               state: 'false'
             - condition: template
-              value_template: >-
+              value_template: >
                 {{ trigger.platform != "homeassistant" or 
                    (trigger_at_startup and state_attr("sun.sun", "elevation") <= sunset_elevation_shift) }}
+        # Sunrise condition
         - condition: and
           conditions:
             - condition: state
@@ -98,7 +103,7 @@ blueprint:
               attribute: rising
               state: 'true'
             - condition: template
-              value_template: >-
+              value_template: >
                 {{ trigger.platform != "homeassistant" or 
                    (trigger_at_startup and state_attr("sun.sun", "elevation") >= sunrise_elevation_shift) }}
 
@@ -117,9 +122,9 @@ blueprint:
                   sequence:
                     - service: >
                         {% if flip_light_action %}
-                          light.turn_on
+                        light.turn_on
                         {% else %}
-                          light.turn_off
+                        light.turn_off
                         {% endif %}
                       target:
                         entity_id: "{{ target_light }}"
@@ -131,9 +136,9 @@ blueprint:
                   sequence:
                     - service: >
                         {% if flip_light_action %}
-                          light.turn_off
+                        light.turn_off
                         {% else %}
-                          light.turn_on
+                        light.turn_on
                         {% endif %}
                       target:
                         entity_id: "{{ target_light }}"
