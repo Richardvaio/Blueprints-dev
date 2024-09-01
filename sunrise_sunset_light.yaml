@@ -55,7 +55,7 @@ blueprint:
       selector:
         number:
           min: 0
-          max: 3600
+          max: 10
           unit_of_measurement: "s"
 
 trigger:
