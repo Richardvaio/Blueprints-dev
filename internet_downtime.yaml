@@ -1,0 +1,127 @@
+blueprint:
+  name: Kids Devices - Turn Off and On with Parallel Processing and Adaptive Retry
+  description: "Turn off and turn on devices in parallel with adaptive retries and notification if a device fails."
+  domain: automation
+  input:
+    switches:
+      name: Devices to Turn Off and On
+      description: "List of switch devices to turn off and on"
+      selector:
+        entity:
+          domain: switch
+          multiple: true
+    max_retries:
+      name: Maximum Retries
+      description: "Maximum number of retries for each device"
+      default: 5
+      selector:
+        number:
+          min: 1
+          max: 10
+    initial_retry_delay:
+      name: Initial Retry Delay
+      description: "Initial delay before the first retry, in seconds"
+      default: 5
+      selector:
+        number:
+          min: 1
+          max: 60
+    retry_backoff_factor:
+      name: Retry Backoff Factor
+      description: "Multiplier for increasing the delay between retries"
+      default: 2
+      selector:
+        number:
+          min: 1
+          max: 10
+    check_delay:
+      name: Check Delay
+      description: "Delay before checking if the device is off, in seconds"
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 60
+    notify_device:
+      name: Notification Device
+      description: "The device to notify when a device fails to turn off"
+      selector:
+        device:
+          integration: mobile_app
+    turn_off_time:
+      name: Turn Off Time
+      description: "Time to turn off the devices"
+      selector:
+        time:
+    turn_on_time:
+      name: Turn On Time
+      description: "Time to turn on the devices"
+      selector:
+        time
+
+trigger:
+  - platform: time
+    at: !input turn_off_time
+condition: []
+action:
+  - alias: Turn Off Devices in Parallel
+    parallel:
+      - repeat:
+          count: "{{ input.switches | length }}"
+          sequence:
+            - variables:
+                current_switch: "{{ input.switches[repeat.index - 1] }}"
+            - condition: template
+              value_template: "{{ is_state(current_switch, 'on') }}"
+            - service: switch.turn_off
+              target:
+                entity_id: "{{ current_switch }}"
+            - delay: "{{ input.check_delay }}"
+            - repeat:
+                count: "{{ input.max_retries }}"
+                sequence:
+                  - condition: template
+                    value_template: "{{ not is_state(current_switch, 'off') }}"
+                  - service: switch.turn_off
+                    target:
+                      entity_id: "{{ current_switch }}"
+                  - delay: >-
+                      {{ (input.initial_retry_delay * (input.retry_backoff_factor ** (repeat.index - 1))) | int }}
+            - wait_template: "{{ is_state(current_switch, 'off') }}"
+              timeout: "00:00:15"
+              continue_on_timeout: true
+            - condition: template
+              value_template: "{{ not is_state(current_switch, 'off') }}"
+            - service: notify.mobile_app_iphone_15_pro_max
+              target:
+                device_id: "{{ input.notify_device }}"
+              data:
+                message: "Failed to turn off: {{ current_switch }} after retries."
+  - service: notify.mobile_app_iphone_15_pro_max
+    target:
+      device_id: "{{ input.notify_device }}"
+    data:
+      message: "All devices processed. Check notifications for any issues."
+
+# Turn on the devices at the specified turn_on_time
+  - alias: Turn On Devices at Scheduled Time
+    trigger:
+      - platform: time
+        at: !input turn_on_time
+    action:
+      - parallel:
+          - repeat:
+              count: "{{ input.switches | length }}"
+              sequence:
+                - variables:
+                    current_switch: "{{ input.switches[repeat.index - 1] }}"
+                - service: switch.turn_on
+                  target:
+                    entity_id: "{{ current_switch }}"
+      - service: notify.mobile_app_iphone_15_pro_max
+        target:
+          device_id: "{{ input.notify_device }}"
+        data:
+          message: "All devices turned on at the scheduled time."
+
+mode: parallel
