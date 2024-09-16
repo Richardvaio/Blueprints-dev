@@ -52,12 +52,12 @@ blueprint:
       name: Turn Off Time
       description: "Time to turn off the devices"
       selector:
-        time:
+        time: {}
     turn_on_time:
       name: Turn On Time
       description: "Time to turn on the devices"
       selector:
-        time
+        time: {}
 
 trigger:
   - platform: time
