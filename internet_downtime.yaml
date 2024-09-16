@@ -59,6 +59,7 @@ blueprint:
       selector:
         time: {}
 
+# First automation - Turn off the devices at the specified time
 trigger:
   - platform: time
     at: !input turn_off_time
@@ -103,25 +104,25 @@ action:
     data:
       message: "All devices processed. Check notifications for any issues."
 
-# Turn on the devices at the specified turn_on_time
-  - alias: Turn On Devices at Scheduled Time
-    trigger:
-      - platform: time
-        at: !input turn_on_time
-    action:
-      - parallel:
-          - repeat:
-              count: "{{ input.switches | length }}"
-              sequence:
-                - variables:
-                    current_switch: "{{ input.switches[repeat.index - 1] }}"
-                - service: switch.turn_on
-                  target:
-                    entity_id: "{{ current_switch }}"
-      - service: notify.mobile_app_iphone_15_pro_max
-        target:
-          device_id: "{{ input.notify_device }}"
-        data:
-          message: "All devices turned on at the scheduled time."
+# Second automation - Turn on the devices at the specified time
+trigger:
+  - platform: time
+    at: !input turn_on_time
+action:
+  - alias: Turn On Devices in Parallel
+    parallel:
+      - repeat:
+          count: "{{ input.switches | length }}"
+          sequence:
+            - variables:
+                current_switch: "{{ input.switches[repeat.index - 1] }}"
+            - service: switch.turn_on
+              target:
+                entity_id: "{{ current_switch }}"
+  - service: notify.mobile_app_iphone_15_pro_max
+    target:
+      device_id: "{{ input.notify_device }}"
+    data:
+      message: "All devices turned on at the scheduled time."
 
 mode: parallel
