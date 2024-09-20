@@ -1,0 +1,173 @@
+blueprint:
+  name: Ultimate Hue Dimmer Switch Automation
+  description: The most advanced Hue Dimmer Switch automation with scene cycling, adaptive brightness, brightness cycling, multi-device control, and customizable hold actions.
+  domain: automation
+  input:
+    dimmer_switch:
+      name: Hue Dimmer Switch
+      description: Entity of the Hue Dimmer Switch.
+      selector:
+        entity:
+          domain: sensor
+    main_light_group:
+      name: Main Light Group
+      description: The primary light group to control.
+      selector:
+        entity:
+          domain: light
+    additional_device:
+      name: Additional Device Control
+      description: Optional additional device (like light strips or lamps) to control alongside the main light group.
+      selector:
+        entity:
+          domain: light
+      default: []
+      required: false
+    use_scene_list:
+      name: Use Scene List?
+      description: Toggle to use a scene list for cycling through different scenes.
+      default: false
+      selector:
+        boolean: {}
+    scene_list:
+      name: Scene List
+      description: The input_select entity for selecting scenes (if using scene list).
+      selector:
+        entity:
+          domain: input_select
+      default: ""
+      required: false
+    scene_off:
+      name: Off Scene
+      description: The scene to activate when the off button is pressed.
+      selector:
+        entity:
+          domain: scene
+    enable_scene_cycle:
+      name: Enable Scene Cycling?
+      description: Enable scene cycling with the on button.
+      default: true
+      selector:
+        boolean: {}
+    brightness_levels:
+      name: Brightness Levels for On Press
+      description: List of brightness levels to cycle through when scene list is not used.
+      default:
+        - 10
+        - 30
+        - 60
+        - 100
+      selector:
+        object: {}
+    brightness_adjustment:
+      name: Brightness Adjustment Value
+      description: Step value for increasing or decreasing brightness (for up-press and down-press).
+      default: 15
+      selector:
+        number:
+          min: 1
+          max: 100
+          unit_of_measurement: '%'
+    hold_brightness_adjustment:
+      name: Hold Brightness Adjustment Value
+      description: Step value for increasing or decreasing brightness on hold actions.
+      default: 50
+      selector:
+        number:
+          min: 1
+          max: 100
+          unit_of_measurement: '%'
+    use_adaptive_brightness:
+      name: Enable Adaptive Brightness?
+      description: Automatically adjust brightness based on time of day (lower at night, higher during the day).
+      default: false
+      selector:
+        boolean: {}
+    adaptive_brightness_day:
+      name: Daytime Brightness Level
+      description: Brightness level during the day (if adaptive brightness is enabled).
+      default: 255
+      selector:
+        number:
+          min: 1
+          max: 255
+          unit_of_measurement: '%'
+    adaptive_brightness_night:
+      name: Nighttime Brightness Level
+      description: Brightness level during the night (if adaptive brightness is enabled).
+      default: 50
+      selector:
+        number:
+          min: 1
+          max: 255
+          unit_of_measurement: '%'
+
+trigger:
+  - platform: state
+    entity_id: !input dimmer_switch
+
+action:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.to_state.attributes['action'] == 'off-press' }}"
+        sequence:
+          - service: scene.turn_on
+            data:
+              transition: 0.8
+            target:
+              entity_id: !input scene_off
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.to_state.attributes['action'] == 'on-press' }}"
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ not is_truthy(input.use_scene_list) }}"
+                sequence:
+                  - service: light.turn_on
+                    data_template:
+                      entity_id: !input main_light_group
+                      brightness: >-
+                        {% set current_brightness = state_attr(input.main_light_group, 'brightness') | int %}
+                        {% set brightness_levels = input.brightness_levels | map('int') %}
+                        {% set next_brightness = brightness_levels | select('>', current_brightness) | first %}
+                        {% if next_brightness is none %}
+                          {{ brightness_levels[0] }}
+                        {% else %}
+                          {{ next_brightness }}
+                        {% endif %}
+                      transition: 0.4
+              - conditions:
+                  - condition: template
+                    value_template: "{{ is_truthy(input.use_scene_list) }}"
+                sequence:
+                  - service: input_select.select_next
+                    target:
+                      entity_id: !input scene_list
+                  - service: scene.turn_on
+                    data:
+                      transition: 0.4
+                    target:
+                      entity_id: "{{ states('input_select.' + input.scene_list) }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.to_state.attributes['action'] == 'up-press' }}"
+        sequence:
+          - service: light.turn_on
+            data_template:
+              entity_id: !input main_light_group
+              brightness: >-
+                {{ [255, state_attr('!input main_light_group', 'brightness') | int + !input brightness_adjustment] | min }}
+              transition: 0.3
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.to_state.attributes['action'] == 'down-press' }}"
+        sequence:
+          - service: light.turn_on
+            data_template:
+              entity_id: !input main_light_group
+              brightness: >-
+                {{ [0, state_attr('!input main_light_group', 'brightness') | int - !input brightness_adjustment] | max }}
+              transition: 0.3
