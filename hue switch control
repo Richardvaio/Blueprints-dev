@@ -22,7 +22,6 @@ blueprint:
         entity:
           domain: light
       default: []
-      required: false
     use_scene_list:
       name: Use Scene List?
       description: Toggle to use a scene list for cycling through different scenes.
@@ -36,7 +35,6 @@ blueprint:
         entity:
           domain: input_select
       default: ""
-      required: false
     scene_off:
       name: Off Scene
       description: The scene to activate when the off button is pressed.
